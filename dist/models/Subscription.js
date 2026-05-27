@@ -1,0 +1,73 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+const mongoose_1 = __importStar(require("mongoose"));
+const sharedMemberSchema = new mongoose_1.Schema({
+    user: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User' },
+    email: { type: String, required: true, trim: true, lowercase: true },
+    status: { type: String, enum: ['pending', 'active'], default: 'pending' },
+    shareAmount: { type: Number, required: true, min: 0 },
+    joinedAt: { type: Date },
+}, { _id: false });
+const subscriptionSchema = new mongoose_1.Schema({
+    user: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User', required: true },
+    name: { type: String, required: true, trim: true },
+    price: { type: Number, required: true, min: 0 },
+    currency: { type: String, default: 'USD' },
+    billingCycle: {
+        type: String,
+        enum: ['monthly', 'yearly', 'weekly', 'custom'],
+        default: 'monthly',
+    },
+    nextBillingDate: { type: Date, required: true },
+    startDate: { type: Date },
+    endDate: { type: Date },
+    category: { type: String, default: 'Other' },
+    status: {
+        type: String,
+        enum: ['active', 'canceled'],
+        default: 'active',
+    },
+    logo: { type: String },
+    notes: { type: String },
+    isShared: { type: Boolean, default: false },
+    sharedMembers: [sharedMemberSchema],
+    splitType: { type: String, enum: ['equal', 'custom'], default: 'equal' },
+}, { timestamps: true });
+subscriptionSchema.index({ user: 1, status: 1 });
+subscriptionSchema.index({ user: 1, nextBillingDate: 1 });
+subscriptionSchema.index({ 'sharedMembers.email': 1, 'sharedMembers.status': 1 });
+exports.default = mongoose_1.default.model('Subscription', subscriptionSchema);
+//# sourceMappingURL=Subscription.js.map
